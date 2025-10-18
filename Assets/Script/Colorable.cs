@@ -4,12 +4,10 @@ using UnityEngine;
 public class Colorable : MonoBehaviour
 {
     private MeshRenderer _renderer;
-    private Color _defaultColor;
 
     private void Awake()
     {
         _renderer = GetComponent<MeshRenderer>();
-        _defaultColor = _renderer.material.color;
     }
 
     public void SetRandomColor()
@@ -17,8 +15,8 @@ public class Colorable : MonoBehaviour
         _renderer.material.color = Random.ColorHSV();
     }
 
-    public void SetDefaultColor()
+    public void SetColor(Color color)
     {
-
+        _renderer.material.color = color;
     }
 }
