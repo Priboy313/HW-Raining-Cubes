@@ -1,14 +1,18 @@
 using System;
+using System.Collections;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody), typeof(Colorable))]
 public class Rainable : MonoBehaviour
 {
+    private float _lifetimeMin = 2;
+    private float _lifetimeMax = 5;
+
     private Colorable _colorable;
     private Rigidbody _rigidbody;
     private bool hasCollided = false;
 
-    public event Action<Rainable> ActionPlatformCollided;
+    public event Action<Rainable> ActionLifetimeOut;
 
     public Rigidbody Rigidbody => _rigidbody;
 
@@ -18,9 +22,12 @@ public class Rainable : MonoBehaviour
         _colorable = GetComponent<Colorable>();
     }
 
-    public void Init(Color color)
+    public void Init(Color color, float lifetimeMin, float lifetimeMax)
     {
         _colorable.SetColor(color);
+        _lifetimeMin = lifetimeMin;
+        _lifetimeMax = lifetimeMax;
+
         hasCollided = false;
     }
 
@@ -30,7 +37,15 @@ public class Rainable : MonoBehaviour
         {
             hasCollided = true;
             _colorable.SetRandomColor();
-            ActionPlatformCollided?.Invoke(this);
+
+            StartCoroutine(StartTimerToDestroy());
         }
+    }
+
+    private IEnumerator StartTimerToDestroy()
+    {
+        yield return new WaitForSeconds(DevUtils.GetRandomNumber(_lifetimeMin, _lifetimeMax + 1f));
+
+        ActionLifetimeOut?.Invoke(this);
     }
 }

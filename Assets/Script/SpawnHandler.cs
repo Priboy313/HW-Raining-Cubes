@@ -40,7 +40,7 @@ public class SpawnHandler : MonoBehaviour
             createFunc: CreatePooledObject,
             actionOnGet: (rainable) => OnTakeFromPool(rainable),
             actionOnRelease: (rainable) => rainable.gameObject.SetActive(false),
-            actionOnDestroy: (rainable) => Destroy(rainable.gameObject),
+            actionOnDestroy: OnDestroyFromPool,
             collectionCheck: true,
             defaultCapacity: _poolCapacity,
             maxSize: _poolMaxSize
@@ -55,7 +55,7 @@ public class SpawnHandler : MonoBehaviour
     private Rainable CreatePooledObject()
     {
         Rainable rainable = Instantiate(_prefabRainable);
-        rainable.ActionPlatformCollided += OnPlatformCollided;
+        rainable.ActionLifetimeOut += OnLifetimeOut;
 
         return rainable;
     }
@@ -63,11 +63,22 @@ public class SpawnHandler : MonoBehaviour
     private void OnTakeFromPool(Rainable rainable)
     {
         rainable.transform.position = DevUtils.GetRandomVector3(_spawnZoneStart.position, _spawnZoneEnd.position);
+        ResetRainable(rainable);
+        rainable.gameObject.SetActive(true);
+    }
+
+    private void ResetRainable(Rainable rainable)
+    {
+        rainable.Init(_defaultPrefabColor, _lifetimeMin, _lifetimeMax);
         rainable.Rigidbody.velocity = Vector3.zero;
         rainable.Rigidbody.angularVelocity = Vector3.zero;
+        rainable.Rigidbody.rotation = Quaternion.Euler(Vector3.zero);
+    }
 
-        rainable.Init(_defaultPrefabColor);
-        rainable.gameObject.SetActive(true);
+    private void OnDestroyFromPool(Rainable rainable)
+    {
+        rainable.ActionLifetimeOut -= OnLifetimeOut;
+        Destroy(rainable.gameObject);
     }
 
     private IEnumerator SpawnObjectOfPool()
@@ -82,15 +93,9 @@ public class SpawnHandler : MonoBehaviour
         }
     }
 
-    private void OnPlatformCollided(Rainable rainable)
+    private void OnLifetimeOut(Rainable rainable)
     {
-        StartCoroutine(StartTimerToDestroy(rainable));
-    }
-
-    private IEnumerator StartTimerToDestroy(Rainable rainable)
-    {
-        yield return new WaitForSeconds(DevUtils.GetRandomNumber(_lifetimeMin, _lifetimeMax + 1f));
-
         _pool.Release(rainable);
     }
+
 }
