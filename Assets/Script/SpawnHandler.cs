@@ -72,7 +72,7 @@ public class SpawnHandler : MonoBehaviour
         rainable.Init(_defaultPrefabColor, _lifetimeMin, _lifetimeMax);
         rainable.Rigidbody.velocity = Vector3.zero;
         rainable.Rigidbody.angularVelocity = Vector3.zero;
-        rainable.Rigidbody.rotation = Quaternion.Euler(Vector3.zero);
+        rainable.transform.rotation = Quaternion.Euler(Vector3.zero);
     }
 
     private void OnDestroyFromPool(Rainable rainable)
