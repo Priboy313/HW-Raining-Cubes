@@ -3,16 +3,13 @@ using System.Collections;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody), typeof(Colorable))]
-public class Rainable : MonoBehaviour
+public class Rainable : PoolableObject
 {
-    private float _lifetimeMin = 2;
-    private float _lifetimeMax = 5;
-
+    private float _lifetime = 2;
+    private bool hasCollided = false;
+    
     private Colorable _colorable;
     private Rigidbody _rigidbody;
-    private bool hasCollided = false;
-
-    public event Action<Rainable> ActionLifetimeOut;
 
     public Rigidbody Rigidbody => _rigidbody;
 
@@ -25,13 +22,11 @@ public class Rainable : MonoBehaviour
     public void Init(Color color, float lifetimeMin, float lifetimeMax)
     {
         _colorable.SetColor(color);
-        _lifetimeMin = lifetimeMin;
-        _lifetimeMax = lifetimeMax;
-
+        _lifetime = DevUtils.GetRandomNumber(lifetimeMin, lifetimeMax);
         hasCollided = false;
     }
 
-    private void OnCollisionEnter(Collision collision)
+	private void OnCollisionEnter(Collision collision)
     {
         if (hasCollided == false && collision.gameObject.TryGetComponent<Platform>(out _))
         {
@@ -44,8 +39,8 @@ public class Rainable : MonoBehaviour
 
     private IEnumerator StartTimerToDestroy()
     {
-        yield return new WaitForSeconds(DevUtils.GetRandomNumber(_lifetimeMin, _lifetimeMax + 1f));
+        yield return new WaitForSeconds(_lifetime);
 
-        ActionLifetimeOut?.Invoke(this);
+        ReturnToPool();
     }
 }

@@ -19,4 +19,15 @@ public class Colorable : MonoBehaviour
     {
         _renderer.material.color = color;
     }
+
+    public void SetAlpha(float current, float max)
+    {
+        float valueAlpha = Mathf.Clamp01(current / max);
+
+        Color currentColor = _renderer.material.color;
+
+        currentColor.a = valueAlpha;
+
+        _renderer.material.color = currentColor;
+    }
 }
